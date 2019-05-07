@@ -1,0 +1,17 @@
+c.i.a.
+47
+
+c.i.b.
+5
+
+c.ii.
+Keying function: metaphone3. Cluster found: 566
+
+c.iii.
+if(isNull(value), 'Unbranded', value)
+
+c.iv.
+if(and(value.length()>=3, value != '100'), "1", "0")
+
+c.v.
+if(or(value.contains("sale"), value.contains("offer"), value.contains("discount")), "1", "0")

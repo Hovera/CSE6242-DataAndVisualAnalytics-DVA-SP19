@@ -1,0 +1,11 @@
+Average node degree: 2.29
+A node’s degree is the number of edges it has. If one movie has many degrees it means it has a lot of similar movies.  On average a movie has about 2.29 connections with others.
+
+Diameter of the graph: 9
+The diameter is the longest graph distance between any two nodes in the network. The two most distant nodes in my graph has a distance of 9.
+
+Average path length: 2.87 
+On average, there’s a graph-distance of 2.87 between all pairs of nodes. Note that connected nodes have graph distance 1. 
+
+
+// comment: -2 metric definitions for diameter and avg path length incorrect; 

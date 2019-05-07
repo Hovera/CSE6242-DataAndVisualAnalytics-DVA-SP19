@@ -1,0 +1,182 @@
+-- Setup. DO NOT REMOVE.
+.headers on
+.separator ','
+
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS movie_cast;
+DROP VIEW IF EXISTS good_collaboration;
+DROP TABLE IF EXISTS movie_overview;
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (a.i) Create tables
+
+-- [insert your SQL statement(s) BELOW this line]
+create table movies(id integer, name text, score integer);
+create table movie_cast(movie_id integer, cast_id integer, cast_name text);
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.tables
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (a.ii) Import data
+
+-- [insert your SQLite command(s) BELOW this line]
+.import movie-name-score.txt movies
+.import movie-cast.txt movie_cast
+
+
+-- [insert your SQLite command(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.headers off
+SELECT COUNT(*) FROM movies;
+SELECT COUNT(*) FROM movie_cast;
+.headers on
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (b) Create indexes
+
+-- [insert your SQL statement(s) BELOW this line]
+create index scores_index on movies(score);
+create index cast_index on movie_cast(cast_id);
+create index movie_index on movies(id);
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.indexes
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (c) Calculate a proportion
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select round(sum(case when score > 50 then 1 else 0 end) * 100) / count(*) as prop from movies;
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (d) Find the highest scoring movies
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select id, name, score from movies order by score desc, name asc limit 7;
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (e) Find the most prolific actors
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select cast_id, cast_name, count(cast_id) as movie_count from movie_cast group by cast_id order by movie_count desc, cast_name asc limit 5;
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (f) Get high scoring actors
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select cast_id, cast_name, avg(score) as average_score from (select * from (select * from  movies where score >= 50) inner join movie_cast ON id = movie_id) group by cast_name having count(cast_name)>2 order by average_score desc, cast_name asc limit 10;
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (g) Creating views
+
+-- [insert your SQL statement(s) BELOW this line]
+
+create view good_collaboration as select A.cast_id as cast_member_id1, B.cast_id as cast_member_id2, count(A.movie_id) as movie_count, avg(A.score) as average_movie_score from (select * from (select cast_id, movie_id from movie_cast) INNER JOIN (select id, score from movies) ON id = movie_id) as A INNER JOIN (select * from (select cast_id, movie_id from movie_cast) INNER JOIN (select id, score from movies) ON id = movie_id) as B on (B.movie_id = A.movie_id and A.cast_id <> B.cast_id and A.cast_id < B.cast_id) group by cast_member_id1, cast_member_id2 having movie_count >= 3 and average_movie_score >= 40 order by movie_count desc;
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.headers off
+PRAGMA table_info(good_collaboration);
+SELECT AVG(average_movie_score) FROM good_collaboration;
+.headers on
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (h) Find the best collaborators
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select cast_id, cast_name, avg(average_movie_score) as collaboration_score from (select * from good_collaboration ) inner join (select cast_id, cast_name from movie_cast) on (cast_member_id1 = cast_id OR cast_member_id2 = cast_id) group by cast_id order by collaboration_score desc, cast_name asc limit 5;
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (i) Create FTS table and import data
+
+-- [insert your SQL statement(s) BELOW this line]
+
+CREATE VIRTUAL TABLE movie_overview USING fts3 (id integer, name text, year integer, overview text, popularity decimal);
+.import movie-overview.txt movie_overview
+
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (i.1) Count movies with "fight"
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select count(overview) as count_overview from (select overview from movie_overview where overview match 'fight');
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --
+
+-- (i.2) List movies with "love" and "story" nearby
+
+-- [insert your SQL statement(s) BELOW this line]
+
+select id from movie_overview where overview match 'love NEAR/5 story';
+
+-- [insert your SQL statement(s) ABOVE this line]
+
+-- [the following statement(s) are for autograding. DO NOT REMOVE.]
+.print '~~~~~'
+
+-- ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** --

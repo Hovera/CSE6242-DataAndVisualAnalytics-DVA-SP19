@@ -1,0 +1,1 @@
+I chose black background for visual aesthetics. Different colors of nodes indicate sub-groups (colored by Modularity Class). Arrows in edges show directions between connected node pairs. For visual clarity, edges whose nodes have less than 3 degrees were filtered out. Bigger nodes/labels indicate higher significance in connecting the network.
