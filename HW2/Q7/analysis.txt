@@ -1,0 +1,28 @@
+1.Ease to develop
+D3: Straightforward but tedious because you can modify every detail to perfection. Also have to scale everything.
+Tableau: Easy to use, like dragging measurements and filtering variables. Don’t need particular coding experience.
+Seaborn: Codes to generate plots are simple, but it requires python knowledge.
+
+2. Ease to maintain visualization
+D3: Moderate. In addition to modify calculations, may need to re-design all scaling functions and graphics.
+Tableau: Mild. Dragging and filtering different measurements can generate new graphs. 
+Seaborn: Mild to moderate. May need to modify calculations and simple designs. Then re-run the code.
+
+3. Usability of Visualization
+D3: Interactive. Has drop down menu, hover box, fixed node positions. Usable for end users.
+Tableau: Very interactive to use. Can be saved as workbook and user can change visual aspects themselves.
+Seaborn: Not very usable. The result is only an image. Will have to change code if end user wants something else.
+
+
+4. Scalability to large datasets
+D3: Yes. Choropleth map is a start, very scalable but still it’s small data. Performance can be slow.
+Tableau: Tableau is known for visualizing extremely large data sets. 
+Seaborn: Can handle large datasets, but based on personal experience it can be slow.
+
+5. System requirements
+D3:Free. Can run on web browsers. Just needs some libraries beforehand.
+Tableau: Simple software installation makes it easy for any kind of users. However, it's not free!
+Seaborn: Free. Requires python and several libraries. Might need some basic development skills to install it.
+
+
+* Note that my only experience with D3 and Tableau are from the two homework sets, so my understanding, particularly of Tableau, might be limited to the scope of homework questions. Also, word count did not include questions, names of the tools and this note.

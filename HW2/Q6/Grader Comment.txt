@@ -1,0 +1,1 @@
+Q6 (19/20); ; The tooltip clipped near the margins and values are not visible properly

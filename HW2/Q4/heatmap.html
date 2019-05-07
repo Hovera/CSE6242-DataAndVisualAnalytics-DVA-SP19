@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>steng6</title>
+		<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+		<style type="text/css">
+			body {
+			  font: 10px sans-serif;
+			}
+
+			.label {
+			  font-weight: bold;
+			}
+
+			.tile {
+			  shape-rendering: crispEdges;
+			}
+
+			.axis path,
+			.axis line {
+			  fill: none;
+			  stroke: #fff;
+			  shape-rendering: crispEdges;
+			}
+
+			.select {
+				position: absolute;
+				left: 350px;
+				top: 55px;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<script type="text/javascript">
+
+			var w = 800;
+			var h = 800;
+			var spacing = 2;
+			var margin = 30;
+			var tile_size = (w - margin * 2 - 5 * spacing) / 8;  //90
+
+			var year_2011= [], year_2012 = [], year_2013 = [], year_2014 = [], year_2015 = [];
+
+		    var year_dict = {
+				"Year 2011": year_2011, 
+				"Year 2012": year_2012, 
+				"Year 2013": year_2013, 
+				"Year 2014": year_2014, 
+				"Year 2015": year_2015
+			};
+
+			d3.csv("heatmap.csv").then(function(data) {
+			  data.forEach(function(d) {
+			    d.Bronx = + d.Bronx
+			    d.Brooklyn = +d.Brooklyn
+			    d.Manhattan = +d.Manhattan
+			    d.Queens = +d.Queens
+			    d.Staten_Island = +d["Staten Island"]
+			    d.Year = +d.Year
+
+				// push data into new datasets by year
+			    if (d.Year == 2011){year_2011.push(d);}
+			    else if (d.Year == 2012) {year_2012.push(d);}
+			    else if (d.Year == 2013) {year_2013.push(d);}
+			    else if (d.Year == 2014) {year_2014.push(d);}
+			    else {year_2015.push(d);}				
+			  });
+
+			 var select = d3.select('body')
+			  	.append('select')
+			  	.attr('class','select')
+			  	.on('change',onchange)
+
+			  var year = [" Year 2011", " Year 2012", " Year 2013", "Year 2014", "Year 2015"];
+
+			  var options = select.selectAll('option')
+				.data(year)
+				.enter()
+				.append('option')
+				.text(function (d) { return d});
+
+
+			  function onchange() {
+				var selectValue = d3.select('select').property('value')
+				d3.select('body')
+				  .selectAll('svg')
+    	  		  .remove();
+
+				select_year(year_dict[selectValue]);
+				};
+			  	select_year(year_2011);
+
+			});
+
+			var crime = ["Murder", "Murder", "Murder", "Murder", "Murder", 
+						 "Robbery","Robbery","Robbery","Robbery","Robbery",
+						 "Assault","Assault","Assault","Assault","Assault",
+						 "Burglary","Burglary","Burglary","Burglary","Burglary",
+						 "Shooting", "Shooting", "Shooting", "Shooting", "Shooting", 
+				         "Housing", "Housing","Housing","Housing","Housing"];
+
+			function select_year(data) {
+				crime_data = [];
+				data.forEach(function(d) {
+					crime_data.push(["Bronx", d.Bronx]);
+					crime_data.push(["Brooklyn", d.Brooklyn]);
+					crime_data.push(["Manhattan", d.Manhattan]);
+					crime_data.push(["Queens", d.Queens]);
+					crime_data.push(["Staten Island", d.Staten_Island]);
+				});
+
+				var i;
+				for (i = 0; i < 30; i ++){ crime_data[i].push(crime[i]);}
+
+				var borough = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"];
+				var crime_list = [ "Assault", "Burglary","Housing", "Murder", "Robbery", "Shooting"];
+				var colorscale = ['#f7f4f9','#e7e1ef','#d4b9da','#c994c7','#df65b0','#e7298a','#ce1256','#980043','#67001f'];
+
+				var x = d3.scalePoint()
+						  .domain(crime_list)
+						  .range([margin * 3.5, 6.2 *  (tile_size + spacing)]);
+
+				var y = d3.scalePoint()
+					      .domain(borough)
+					      .range([margin * 2, 4.7 * (tile_size + spacing)]);
+
+				var color = d3.scaleQuantile()
+							  .domain([0, d3.max(crime_data, function(d, i) {return d[1];})])
+							  .range(colorscale);
+				
+				var svg = d3.select("body").append("svg")
+					.attr("width", w)
+					.attr("height", h)
+					.append("g")
+					.attr("transform", "translate(" + margin + "," + margin + ")");
+				
+				svg.selectAll(".tile")
+				    .data(crime_data)
+				    .enter()
+				    .append("rect")
+				    .attr("class", "tile")
+				    .attr("x", function(d, i) { return x(d[2]); })
+				    .attr("y", function(d, i) { return y(d[0]); })
+	     		    .attr("fill", function(d, i) { return color(d[1]); })
+			        .attr("width", tile_size)
+			        .attr("height", tile_size)
+				    .attr("rx", 10)
+				    .attr("ry", 10);
+
+
+				svg.append("g")
+				    .attr("class", "x axis")
+				    .attr("transform", "translate(" + margin * 1.5 + "," + 540 + ")")
+				    .style("font-size", "18px")
+				    .call(d3.axisBottom(x));
+
+				svg.append("g")
+				   .attr("class", "y axis")
+				   .attr("transform", "translate(" + margin * 3.5 + "," + tile_size/2 + ")")
+				   .style("font-size", "18px")
+				   .call(d3.axisLeft(y));
+
+				svg.append("text")
+				   .text("Borough")
+				   .attr("x", margin * 0.8)
+				   .attr("y", 50)
+				   .attr("fill", "Black")
+				   .style("font-weight", "bold")
+				   .style("font-size", "20px");
+
+				svg.append("text")
+				   .text("Crime Type")
+				   .attr("x", w / 2 - margin * 2)
+				   .attr("y", h - margin * 6.5)
+				   .attr("fill", "Black")
+				   .style("font-weight", "bold")
+				   .style("font-size", "20px");
+
+
+				var legend_scale = d3.scaleLinear()
+								    .domain([0, 9])
+								    .range([0, d3.max(crime_data, function(d, i) {return d[1];})]);
+
+
+				var legend = svg.selectAll(".legend")
+  				   .data(colorscale)
+  				   .enter()
+  				   .append("g")
+  				   .attr("class", "legend")
+
+		   	    legend.append("rect")
+		    	   .attr("width", 60)
+		    	   .attr("height", 40)
+		    	   .style("fill", function(d) { return d;})
+		    	   .attr("x", function(d,i) {return 100 + i * 60})
+		    	   .attr("y", h - margin * 3.5);
+
+				legend.append("text")
+			       .attr("x", function(d,i){ return 102 + i * 60})
+			       .attr("y", h - margin * 1.5)
+			       .attr("font-size", "15px")
+			       .text(function(d, i) { return Math.round(legend_scale(i)); });
+
+			    svg.append("text")
+			       .attr("class", "label")
+			       .attr("x", 100)
+			       .attr("y", h - margin * 4)
+			       .attr("font-size", "15px")
+			       .text("Number of Crimes");
+
+			    svg.append("text")
+					.text("Heatmap of Crimes and Boroughs in New York City")
+				 	.attr("transform", "translate(" + margin * 2 + "," + 5 + ")")
+					.style("font-size", "25px")
+					.style("font-weight", "bold");
+
+			};
+
+
+		</script>
+	</body>
+</html>
+
+
+
+

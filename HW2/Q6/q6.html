@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>steng6</title>
+		<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+		<script src="../lib/d3-tip.min.js"></script>
+		<script src="../lib/d3-scale-chromatic.v1.min.js"></script>
+		<script src="../lib/topojson.v2.min.js"></script>
+		<style type="text/css">
+
+		.counties {
+		  fill: none;
+		}
+
+		.states {
+		  fill: none;
+		  stroke: #fff;
+		  stroke-linejoin: round;
+		}
+
+		.d3-tip {
+		  line-height: 1;
+		  font-weight: bold;
+		  padding: 12px;
+		  background: rgba(0, 0, 0, 0.8);
+		  color: #fff;
+		  border-radius: 2px;
+		}
+
+		.legend {
+  	    font-family: "Times New Roman", Times, serif;
+  	    font-size: 13px;
+  		}
+
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+			var unemployment = d3.map();
+			var lala = d3.map();
+			var lele = d3.map();
+			var lolo = d3.map();
+			var detail = d3.map();
+
+			// read multiple file sources into one function
+			var promises = [d3.json('us.json'),
+				d3.csv("county_poverty.csv", function(d) {
+					unemployment.set(d.CensusId, +d.Poverty);
+					lala.set(d.CensusId, d.State);
+					lolo.set(d.CensusId, d.County);
+				}),
+				d3.csv("county_detail.csv", function(d){
+					detail.set(d.CensusId, +d.TotalPop)
+					lele.set(d.CensusId, +d.IncomePerCap);
+				})];
+
+			Promise.all(promises).then(make_map);
+
+			function make_map([us, poverty, population]){
+				var w = 800,
+					h = 800,
+					padding = 50;
+					pov = {},
+        			pop = {},
+        			id_list = [];
+        			pov_list = [];
+
+
+				// create canvas
+				var svg = d3.select("body")
+        					.append("svg")
+         		   		    .attr("width", w + 300)
+          				    .attr("height", h);
+
+	          	// Hover info box
+	    		var tip = d3.tip().attr('class', 'd3-tip').offset([100, 100]).html(function(d) { return "<div><strong>State:</strong></div> " + "<span style='color:green'>" + lala.get(d.id) + "</span>" + "<div><strong>County: </strong></div> " + "<span style='color:green'>" + lolo.get(d.id) + "</span>" + "<div><strong> Poverty: </strong></div> " + "<span style ='color:green'>" + unemployment.get(d.id) + "%" + "</span>" + "<div><strong> Total Population: </strong></div> " + "<span style ='color:green'>" + detail.get(d.id) + "</span>" + "<div><strong> Income per Capita:  </strong></div> " + "<span style ='color:green'>" + lele.get(d.id) + "</span>";});
+
+	    		svg.call(tip);
+
+
+          		// color scale
+          		var colorScale = d3.scaleQuantize()          						   
+   						   		   .domain([0, 11])
+   								   .range(d3.schemeBlues[9]);
+					
+				var path = d3.geoPath();
+
+				svg.append("g")
+					.attr("class", "counties")
+				   .selectAll("path")
+				   .data(topojson.feature(us, us.objects.counties).features)
+				   .enter()
+				   .append("path")
+				   .attr("d", path)
+			       .attr("fill", function(d) { return colorScale(d.Poverty = unemployment.get(d.id))})
+				   .attr("width", w - 400)
+				   .attr("height", h - padding * 2)
+				   .on('mouseover', tip.show)
+				   .on('mouseout', tip.hide);
+
+
+				svg.append("path")
+      				.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+     				.attr("class", "states")
+    				.attr("d", path)
+
+          		var legendScale = d3.scaleQuantize()          						   
+   						   		    .domain([0, 8])
+   								    // .range([1, 11]);
+   								    .range(["<= 1%", "2%", "4%", "5%", "6%", "7%", "9%","10%", ">=11%"])
+
+				var legend = svg.selectAll(".legend")
+		    					  .data(d3.schemeBlues[9])
+		  						  .enter().append("g")
+		    			 	   	  .attr("class", "legend")
+
+			   	legend.append("rect")
+			    	  .attr("width", 20)
+			    	  .attr("height", 20)
+			    	  .style("fill", function(d) { return d; })
+			    	  .style("stroke", "none")
+			    	  .attr("transform", function(d, i) { return "translate(" + (w + padding * 4) + "," +(60 + 21 *i)+ ")"; });
+
+			    legend.append("text")
+			    	  .attr("dy", ".35em")
+			    	  .attr("transform", function(d, i) { return "translate(" +  (w + padding * 4.5)  + "," +(71 + 21 *i)+ ")"; })
+			    	  .text(function(d, i) { return legendScale(i); });
+
+			    legend.append("text")
+			   		  .attr("x", w + padding * 3.7)
+			   		  .attr("y", 45)
+			   		  .text("Poverty Rate")
+
+    				}
+
+
+		
+
+		</script>
+	</body>
+</html>
+
+
+
+

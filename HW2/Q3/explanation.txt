@@ -1,0 +1,5 @@
+Q3.a.2
+Budget vs Rating better separates classes because there’s a clear visual difference: bad rating concentrates at left and good at right. Also points are more scattered and easier to tell apart. However, in WinsNoms vs Rating, points are overlapped and compressed together at bottom and are hard to distinguish.
+
+Q3.c
+Both scales can avoid smaller data being compressed to the bottom of the plot and average out the data distribution. Log function grows very slow, so it is useful when data range is several orders of magnitude. Square root scale won’t have error with data that has zero values.
