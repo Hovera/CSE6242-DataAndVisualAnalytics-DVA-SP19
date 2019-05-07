@@ -1,0 +1,8 @@
+trigrams = LOAD 's3://cse6242-2019spring-trigrams-big/*' USING PigStorage() AS (trigram:chararray, year:int, occurrences:float, books:float);
+filtered_data = FILTER trigrams BY (occurrences >= (float)400) AND (books >= (float)15);
+grouped_data = GROUP filtered_data BY trigram;
+average = FOREACH grouped_data  GENERATE FLATTEN(group), (float)SUM(filtered_data.occurrences)/SUM(filtered_data.books);
+
+ordered_data = ORDER average BY $1 DESC, $0 ASC;
+result = LIMIT ordered_data 20;
+STORE result INTO 's3://cse6242oan-2019spring-steng6/output-big-test/' USING PigStorage('\t');
